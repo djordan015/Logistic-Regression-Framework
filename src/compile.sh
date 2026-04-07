@@ -1,0 +1,1 @@
+g++ -I. test.cc -o model_test
