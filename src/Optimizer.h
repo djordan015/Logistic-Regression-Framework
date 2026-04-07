@@ -9,55 +9,60 @@
 
 class Optimizer{
     private:
-        double learning_rate;
-
-        std::vector<double> calculate_gradients(
-            const std::vector<double> probs,
-            const std::vector<std::vector<double>>& X,
+        Gradients calculate_gradients(
+            const std::vector<double>& pred, 
+            const std::vector<std::vector<double>>& X, 
             const std::vector<double>& Y) 
         {
-            int N = X.size(); // num samples
-            int num_features = X[0].size(); // num weights
+            int N = X.size(); 
+            int num_features = X[0].size();
+            
             std::vector<double> dW(num_features, 0.0);
             double dB = 0.0;
 
-            for(int i = 0; i < num_features; ++i){
-                double sum_error = 0.0;
-                double error = probs[i] - Y[i];
+            // 1. Iterate over every sample
+            for (int i = 0; i < N; ++i) {
+                // Calculate error for this specific sample
+                double error = pred[i] - Y[i];
 
-
-                // calcualte error for each feature
-                for(int j = 0; j < N; ++j){
-                    sum_error += error * X[i][j];
+                // 2. Accumulate gradient for every weight based on this sample
+                for (int j = 0; j < num_features; ++j) {
+                    dW[j] += error * X[i][j];
                 }
 
-                // average gradeint for weight_i
-                dW[i] = sum_error / N;
+                // 3. Accumulate gradient for bias
                 dB += error;
             }
+
+            // 4. Average the gradients over the number of samples
+            for (int j = 0; j < num_features; ++j) {
+                dW[j] /= N;
+            }
             dB /= N;
-            return dW;
+
+            return {dW, dB};
         }
 
 
     public:
-        Optimizer(double lr) : learning_rate(lr){}
+        Optimizer(){};
 
         void apply_step(
             std::vector<double>& weights, 
             double& bias,
+            const std::vector<double>& pred,
             const std::vector<std::vector<double>>& X,
             const std::vector<double>& Y, 
-            const std::vector<double>& probs,
             double lr) 
         {
             // get gradients
-            std::vector<double> gradients = calculate_gradients(probs, X, Y);
+            Gradients grads = calculate_gradients(pred, X, Y);
+            // update weights and bias
             for(size_t i = 0; i < weights.size(); ++i) {
-                weights[i] -= lr * gradients[i];
+                weights[i] -= lr * grads.dW[i];
             }
-            
-            // update bias
+
+            bias -= lr * grads.dB;
         }
 };
 
