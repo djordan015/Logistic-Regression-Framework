@@ -1,7 +1,7 @@
 <!--$https://www.geeksforgeeks.org/machine-learning/understanding-logistic-regression/ -->
 
 <!--gemini was utilized to help understand logistic regression process and math -->
-
+```
 ├── python/ # Python CLI and wrapper implementation
 ├── src/
 │   ├── LogitClassifier.cc/h  # Main classifier logic
@@ -13,3 +13,4 @@
 │   └── CMakeLists.txt        # Build configuration
 ├── CMakeLists.txt        # Build configuration
 └── README.md
+```
