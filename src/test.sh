@@ -1,1 +1,1 @@
-./model_test
+./test_new
