@@ -34,20 +34,9 @@ public:
     // forward pass: (X * W) + B then Sigmoid
     std::vector<double> forward_batch(const std::vector<std::vector<double>>& X, std::vector<double>& weights, double bias){
         std::vector<double> probs(X.size());
-
         for(int i = 0; i < X.size(); ++i) {
             probs[i] = predict_probability(X[i], weights, bias);
         }
-
-        // for(int i = 0; i < X.size(); ++i){
-        //     if(predictions[i] < threshold){
-        //         predictions[i] = 1.0;
-        //     }
-        //     else{
-        //         predictions[i] = 0.0;
-        //     }
-        // }
-
 
         return probs;
     }
