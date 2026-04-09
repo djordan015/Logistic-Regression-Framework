@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
-#include "Model.h"
+#include "model.h"
 // this test suite was generated using gemini
 void test_training_convergence() {
     std::cout << "Running Convergence Test..." << std::endl;
