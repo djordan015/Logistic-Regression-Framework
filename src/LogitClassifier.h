@@ -1,15 +1,12 @@
 #ifndef LOGITCLASSIFIER_H
 #define LOGITCLASSIFIER_H
 
-
 #include <vector>
 #include <cmath>
 #include <stdexcept>
 
-// logit classifier for a SINGLE input x
 class LogitClassifier {
 private:
-    // The core sigmoid transformation
     double sigmoid(double z) {
         return 1.0 / (1.0 + std::exp(-z));
     }

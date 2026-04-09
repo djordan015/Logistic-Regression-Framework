@@ -12,21 +12,36 @@
 
 class Model{
 private:
-    std::vector<std::vector<double>> X_train;
-    std::vector<std::vector<double>> X_test;
-    std::vector<double> Y_train;
-    std::vector<double> Y_test;
+    // const std::vector<std::vector<double>>& X_train;
+    // const std::vector<std::vector<double>>& X_test;
+    // const std::vector<double>& Y_train;
+    // const std::vector<double>& Y_test;
 
     std::vector<double> weights;
-
     double threshold;
-    double lr;
     double bias;
     int epochs;
     
     bool print_log;
     LogitClassifier classifier;
-    Optimizer optimizer;
+
+    // Ensure X and Y are valid and compatible
+    void validate_data(const std::vector<std::vector<double>>& X, const std::vector<double>& Y) const {
+        if (X.empty()) {
+            throw std::invalid_argument("Dataset is empty.");
+        }
+        if (X.size() != Y.size()) {
+            throw std::invalid_argument("Features and labels must have the same number of samples.");
+        }
+    }
+
+    // Weight Initialization
+    void initialize_parameters(int num_features) {
+        if (weights.empty()) { // Only initialize if not already trained
+            weights = std::vector<double>(num_features, 0.0);
+            bias = 0.0;
+        }
+    }
 
     // log loss
     double binary_cross_entropy(std::vector<double> probabilities, std::vector<double>targets){
@@ -57,19 +72,9 @@ public:
         double bias;
     };
 
-    Model(const std::vector<std::vector<double>>& X, 
-             const std::vector<double>& Y, 
-             double th, 
-             double initial_lr, 
-             int ep) 
-    : X_train(X), Y_train(Y), threshold(th), lr(initial_lr), epochs(ep)
-    {
-        if (X_train.empty() || X_train.size() != Y_train.size()) {
-            throw std::invalid_argument("Invalid dataset dimensions."); 
-        }
-        weights = std::vector<double>(X_train[0].size(), 0.0); 
-        bias = 0.0;
-        print_log = true;
+    Model( double th, int ep, bool debug = false) 
+    : threshold(th), epochs(ep), print_log(debug) {
+        classifier = LogitClassifier();
     }
 
     const ModelSnapshot get_snapshot() {
@@ -89,7 +94,6 @@ public:
         return weights;
     }
 
-
     double get_accuracy(const std::vector<double>& probs, const std::vector<double>& Y_train){
         double accuracy = 0.0;
         int correct = 0;
@@ -102,20 +106,34 @@ public:
         return static_cast<double>(correct) / probs.size();
     }
 
-    void train(){
+    void set_epochs(int ep){
+        epochs = ep;
+    }
+
+    void set_threshold(double th){
+        threshold = th;
+    }
+
+    void train(const std::vector<std::vector<double>>& X_train, 
+            const std::vector<double> Y_train, 
+            Optimizer& opt) {
+                
+                validate_data(X_train, Y_train);
+                initialize_parameters(X_train[0].size());
+        
         for (int epoch = 0; epoch < epochs; ++epoch) {
             // 1. Get Predictions (Forward Pass)
             std::vector<double> probs = classifier.forward_batch(X_train, weights, bias);
 
-            // 2. Calculate Loss
-            double current_loss = binary_cross_entropy(probs, Y_train);
 
-            // 3. Calculate Gradients and update weights
-            lr = learning_rate_schedule(epoch);
-            optimizer.apply_step(weights, bias, probs, X_train, Y_train, lr);
+            // 2. Calculate Gradients 
+            Gradients grads = Gradients::calculate_gradients(probs, X_train, Y_train);
+
+            // 3. Update Weights (weights updated by optimizer)
+            double lr = learning_rate_schedule(epoch);
+            opt.apply_step(weights, bias, grads, lr);
             
             // 4. Check Accuracy (Optional logging)
-
             if (print_log && epoch % 100 == 0 ) {
                 double entropy = binary_cross_entropy(probs, Y_train);
                 double accuracy = get_accuracy(probs, Y_train);
