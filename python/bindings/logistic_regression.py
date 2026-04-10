@@ -142,6 +142,22 @@ class LogisticRegression:
         self._is_fitted = True
         return self
 
+    def save_weights(self, path: str) -> None:
+        """Save trained weights and bias to a JSON file."""
+        import json
+        snap = self.get_snapshot()
+        with open(path, 'w') as f:
+            json.dump({'weights': snap.weights, 'bias': snap.bias}, f, indent=2)
+
+    def load_weights(self, path: str) -> "LogisticRegression":
+        """Restore weights and bias from a previously saved JSON file."""
+        import json
+        with open(path) as f:
+            data = json.load(f)
+        self._model.load_snapshot(data['weights'], float(data['bias']))
+        self._is_fitted = True
+        return self
+
     # Hyper-parameter setters
 
     def set_epochs(self, epochs: int) -> "LogisticRegression":
