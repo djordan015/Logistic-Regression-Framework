@@ -1,1 +1,2 @@
-from python.bindings.logistic_regression import LogisticRegression
+from .logistic_regression import LogisticRegression
+#from python.bindings.logistic_regression import LogisticRegression

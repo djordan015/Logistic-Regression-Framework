@@ -1,16 +1,39 @@
 <!--$https://www.geeksforgeeks.org/machine-learning/understanding-logistic-regression/ -->
+# 637 Logistic Regression Framework
 
-<!--gemini was utilized to help understand logistic regression process and math -->
+## Project Structure
+
 ```
-├── python/ # Python CLI and wrapper implementation
 ├── src/
-│   ├── LogitClassifier.cc/h  # Main classifier logic
-│   ├── Model.cc/h            # Base model abstractions
-│   ├── Optimizer.cc/h        # Optimization algorithms (e.g., Gradient Descent)
-│   ├── Types.h               # Custom type definitions and aliases
-│   ├── compile.sh            # Build automation script
-│   ├── train.sh / test.sh    # Execution automation scripts
-│   └── CMakeLists.txt        # Build configuration
-├── CMakeLists.txt        # Build configuration
-└── README.md
+│   ├── LogitClassifier.h     # Logistic Regression logic
+│   ├── Model.h               # Abstract base classes for extensibility
+│   ├── Optimizer.h           # Gradient Descent & optimization routines
+│   ├── Types.h               # Custom type aliases 
+│   ├── bindings.cc           # Pybind11 glue code
+│   └── compile.sh            # One-touch build automation
+├── python/                   # Python wrapper 
+├── cli.py                    # Main entry point for model interaction
+├── CMakeLists.txt            # Cross-platform build configuration
+└── requirements.txt          # Python dependencies (e.g., NumPy, Pandas)
 ```
+
+## Setup
+Download repo 
+
+Configure project using CMake
+
+```
+# From the project root
+cmake -S . -B build
+cmake --build build
+```
+
+Install required libraries
+```
+pip install -r requirements.txt
+```
+
+## Usage
+``
+python3 cli.py 
+``

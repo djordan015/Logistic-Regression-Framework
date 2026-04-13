@@ -19,7 +19,7 @@ from typing import Union
 import numpy as np
 
 try:
-    from logistic_regression_cpu import (
+    from .logistic_regression_cpu import (
         GradientDescent,
         LogitClassifier as _LogitClassifier,
         Model as _Model,
