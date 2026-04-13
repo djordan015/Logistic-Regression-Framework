@@ -7,7 +7,8 @@ This Python framework allows for logistic regression model training and inferenc
 This framework also enables weight saving and loading. 
 - ```.json``` files are used for loading and saving weights
 
->Note: Data must be cleaned, normalized and scaled to achieve strong results
+>Note: Data must be cleaned, normalized and scaled to achieve strong results<br>
+>Note: Column order must remain the same between training and testing
 
 ## Project Structure
 ```
@@ -56,14 +57,13 @@ pip install -r requirements.txt
 ```
 **Setup Complete**
 ## Usage
-Add your .csv file into the root directory
-run the cli script
+- Add your .csv file into project directory. (provide relative path in CLI)
+- run the cli script
 <br>
 ```
 python3 cli.py 
-
 ```
-<br>
+
 
 ## References
 https://www.geeksforgeeks.org/machine-learning/understanding-logistic-regression
