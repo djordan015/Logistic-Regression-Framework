@@ -59,7 +59,6 @@ pip install -r requirements.txt
 ## Usage
 - Add your .csv file into project directory. (provide relative path in CLI)
 - run the cli script
-<br>
 ```
 python3 cli.py 
 ```
