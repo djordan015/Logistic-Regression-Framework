@@ -2,24 +2,17 @@ cmake_minimum_required(VERSION 3.12)
 project(LogisticRegressionFramework)
 
 set(CMAKE_CXX_STANDARD 11)
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR})
 
-set(CMAKE_BUILD_TYPE Release)
-
+# 1. Pull in pybind11
 add_subdirectory(pybind11)
 
-find_package(OpenMP)
-
+# 2. Define your module
 pybind11_add_module(logistic_regression_cpu src/bindings.cc)
 
-# Expose src/ so that angle-bracket includes (e.g. #include <Types.h> in
-# Optimizer.h) resolve correctly when compiling the pybind11 module.
+# 3. Include directories 
 target_include_directories(logistic_regression_cpu PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-
-if (OpenMP_CXX_FOUND)
-  include_directories(OpenMP_CXX_INCLUDE_DIRS)
-  target_link_libraries(LogisticRegressionFramework PUBLIC OpenMP::OpenMP_CXX)
-endif()
-
+# 4. Automatically place the .so file in the python/bindings directory
+set_target_properties(logistic_regression_cpu PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/python/bindings"
+)
