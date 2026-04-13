@@ -44,27 +44,37 @@ private:
     }
 
     // log loss
-    double binary_cross_entropy(std::vector<double> probabilities, std::vector<double>targets){
-        double bce = - (1.0/ probabilities.size());
+    double binary_cross_entropy(std::vector<double> probabilities, std::vector<double> targets) {
+        double bce = - (1.0 / probabilities.size());
         double loss = 0.0;
+        const double eps = 1e-15; // Tiny value to prevent log(0)
 
-        for(int i = 0; i < probabilities.size(); ++i){
+        for(int i = 0; i < probabilities.size(); ++i) {
             double target = targets[i];
             double p = probabilities[i];
-            loss += (target * log(p)) + ((1-target) * log(1-p));
+            
+            // Clip p to be in range [eps, 1 - eps]
+            if (p < eps) p = eps;
+            if (p > 1.0 - eps) p = 1.0 - eps;
+
+            loss += (target * log(p)) + ((1 - target) * log(1 - p));
         }
         return bce * loss;
-    };
-
-
-    double learning_rate_schedule(int epoch){
-        if(epoch < 10000)
-            return 0.1;
-        else if(epoch < 20000)
-            return 0.01;
-        return 0.001;
     }
-    
+
+
+    double learning_rate_schedule(int epoch, int N) {
+        // Base LR: smaller for massive datasets to prevent explosion
+        double base_lr = (N > 100000) ? 0.0001 : 0.01;
+        
+        // Decay factor: determines how fast the LR shrinks
+        // Increasing this makes the LR drop faster
+        double decay = 0.01; 
+
+        // Formula: lr = base_lr / (1 + decay * epoch)
+        return base_lr / (1.0 + decay * epoch);
+    }
+        
 
 public:
     struct ModelSnapshot {
@@ -82,8 +92,8 @@ public:
     }
 
     void load_snapshot(const std::vector<double>& w, double b) {
-        weights = w; // cite: 2
-        bias = b;    // cite: 2
+        weights = w; 
+        bias = b;    
     }
 
     double get_bias(){
@@ -94,13 +104,13 @@ public:
         return weights;
     }
 
-    double get_accuracy(const std::vector<double>& probs, const std::vector<double>& Y_train){
+    double get_accuracy(const std::vector<double>& probs, const std::vector<double>& Y){
         double accuracy = 0.0;
         int correct = 0;
 
         for(size_t i = 0; i < probs.size(); ++i) {
             double pred = (probs[i] >= threshold) ? 1.0 : 0.0;
-            if(pred == Y_train[i]) correct++;
+            if(pred == Y[i]) correct++;
         }
         
         return static_cast<double>(correct) / probs.size();
@@ -118,8 +128,10 @@ public:
             const std::vector<double> Y_train, 
             Optimizer& opt) {
                 
-                validate_data(X_train, Y_train);
-                initialize_parameters(X_train[0].size());
+        validate_data(X_train, Y_train);
+        initialize_parameters(X_train[0].size());
+        
+        int interval = static_cast<int>(epochs * 0.1);
         
         for (int epoch = 0; epoch < epochs; ++epoch) {
             // 1. Get Predictions (Forward Pass)
@@ -130,11 +142,11 @@ public:
             Gradients grads = Gradients::calculate_gradients(probs, X_train, Y_train);
 
             // 3. Update Weights (weights updated by optimizer)
-            double lr = learning_rate_schedule(epoch);
+            double lr = learning_rate_schedule(lr, X_train.size());
             opt.apply_step(weights, bias, grads, lr);
             
             // 4. Check Accuracy (Optional logging)
-            if (print_log && epoch % 100 == 0 ) {
+            if (print_log && epoch % interval == 0 ) {
                 double entropy = binary_cross_entropy(probs, Y_train);
                 double accuracy = get_accuracy(probs, Y_train);
 
