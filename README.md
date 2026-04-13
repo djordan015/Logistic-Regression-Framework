@@ -1,6 +1,6 @@
 <!--$https://www.geeksforgeeks.org/machine-learning/understanding-logistic-regression/ -->
 # 637 Logistic Regression Framework
-By David Jordan and Rohit Patil
+By: David Jordan and Rohit Patil
 
 This Python framework allows for logistic regression model training and inference on ```.csv``` files. This framework works for data sets of varying dimensions.
 
@@ -64,6 +64,6 @@ python3 cli.py
 
 ```
 <br>
-<br>
+
 ## References
 https://www.geeksforgeeks.org/machine-learning/understanding-logistic-regression
