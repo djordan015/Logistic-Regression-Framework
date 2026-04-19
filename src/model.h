@@ -154,7 +154,7 @@ public:
 
         for (int epoch = 0; epoch < epochs; ++epoch) {
             // 1. Get Predictions (Forward Pass)
-            std::vector<double> probs = classifier.forward_batch(X_train, weights, bias);
+            std::vector<double> probs(N);
             
             if(is_sgd){
                 std::shuffle(indices.begin(), indices.end(), g);
@@ -169,6 +169,7 @@ public:
 
                     // 4. Update Weights immediately
                     // double lr = 0.1;
+                    probs[i] = prob;
                     opt.apply_step(weights, bias, grads, learning_rate);
                     }
             }
