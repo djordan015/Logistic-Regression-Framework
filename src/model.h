@@ -92,7 +92,7 @@ public:
     }
 
     const ModelSnapshot get_snapshot() {
-        return {weights, bias}; // cite: 2
+        return {weights, bias}; 
     }
 
     void load_snapshot(const std::vector<double>& w, double b) {
@@ -153,21 +153,16 @@ public:
         std::mt19937 g(rd());
 
         for (int epoch = 0; epoch < epochs; ++epoch) {
-            // 1. Get Predictions (Forward Pass)
             std::vector<double> probs(N);
             
             if(is_sgd){
                 std::shuffle(indices.begin(), indices.end(), g);
                 for (int step = 0; step < N; ++step) {
-                    // 1. Pick a random index between 0 and N-1
                     int i = indices[step];
 
-                    // 2. Predict for ONLY that random sample
                     double prob = classifier.forward_single(X_train[i], weights, bias);
-                    // 3. Calculate Gradient for ONLY that random sample
                     Gradients grads = Gradients::calculate_gradients_sgd(prob, X_train[i], Y_train[i]);
 
-                    // 4. Update Weights immediately
                     // double lr = 0.1;
                     probs[i] = prob;
                     opt.apply_step(weights, bias, grads, learning_rate);
@@ -176,15 +171,13 @@ public:
             else{
                 // Batch Gradient Descent
                 std::vector<double> probs = classifier.forward_batch(X_train, weights, bias);
-                // 2. Calculate Gradients 
                 Gradients grads = Gradients::calculate_gradients(probs, X_train, Y_train);
 
-                // 3. Update Weights (weights updated by optimizer)
                 // double lr = 0.1;
                 opt.apply_step(weights, bias, grads, learning_rate);
             }
             
-            // 4. Check Accuracy (Optional logging)
+            // Check Accuracy
             if (print_log && epoch % interval == 0 ) {
                 double entropy = binary_cross_entropy(probs, Y_train);
                 double accuracy = get_accuracy(probs, Y_train);
