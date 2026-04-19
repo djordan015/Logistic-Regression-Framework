@@ -4,15 +4,7 @@ import pandas as pd
 from python.bindings import LogisticRegression
 
 
-
 # ── CSV helper ────────────────────────────────────────────────────────────────
-
-import pandas as pd
-import numpy as np
-import pandas as pd
-import numpy as np
-
-
 def load_csv(path, label_col):
     # 1. Load the data
     df = pd.read_csv(path)
