@@ -1,13 +1,14 @@
 <!--$https://www.geeksforgeeks.org/machine-learning/understanding-logistic-regression/ -->
 # 637 Logistic Regression Framework
-By: David Jordan and Rohit Patil
+By: **David Jordan** and **Rohit Patil**
 
 This Python framework allows for logistic regression model training and inference on ```.csv``` files. This framework works for data sets of varying dimensions.
 
 This framework also enables weight saving and loading. 
 - ```.json``` files are used for loading and saving weights
 
->Note: Data must be cleaned, normalized and scaled to achieve strong results
+>Note: Data must be cleaned, normalized and scaled to achieve strong results<br>
+>Note: Column order must remain the same between training and testing
 
 ## Project Structure
 ```
@@ -56,14 +57,12 @@ pip install -r requirements.txt
 ```
 **Setup Complete**
 ## Usage
-Add your .csv file into the root directory
-run the cli script
-<br>
+- Add your .csv file into project directory. (provide relative path in CLI)
+- run the cli script
 ```
 python3 cli.py 
-
 ```
-<br>
+
 
 ## References
 https://www.geeksforgeeks.org/machine-learning/understanding-logistic-regression
