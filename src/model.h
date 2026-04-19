@@ -152,8 +152,7 @@ public:
         std::random_device rd;
         std::mt19937 g(rd());
 
-        for (int epoch = 0; epoch < epochs; ++epoch) {
-            std::vector<double> probs(N);
+        for (int epoch = 0; epoch <= epochs; ++epoch) {
             
             if(is_sgd){
                 std::shuffle(indices.begin(), indices.end(), g);
@@ -164,7 +163,6 @@ public:
                     Gradients grads = Gradients::calculate_gradients_sgd(prob, X_train[i], Y_train[i]);
 
                     // double lr = 0.1;
-                    probs[i] = prob;
                     opt.apply_step(weights, bias, grads, learning_rate);
                     }
             }
@@ -178,15 +176,17 @@ public:
             }
             
             // Check Accuracy
-            if (print_log && epoch % interval == 0 ) {
-                double entropy = binary_cross_entropy(probs, Y_train);
-                double accuracy = get_accuracy(probs, Y_train);
+            if ((print_log && epoch % interval == 0 ) || (print_log && epoch == epochs)) {
+                std::vector<double> current_probs = classifier.forward_batch(X_train, weights, bias);
+                double entropy = binary_cross_entropy(current_probs, Y_train);
+                double accuracy = get_accuracy(current_probs, Y_train);
 
                 std::cout << "Epoch: [" << std::setw(5) << epoch << "/" << epochs << "] "
                         << "| Loss: " << std::fixed << std::setprecision(6) << entropy 
                         << "| Acc: " << std::setprecision(2) << (accuracy * 100.0) << "%" 
                         << std::endl;
             }
+            
         }
     }   
 
