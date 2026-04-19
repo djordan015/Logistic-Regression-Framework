@@ -110,12 +110,13 @@ def train():
 
     epochs    = int(prompt('Epochs',               default=1000))
     optimizer = prompt('Optimizer (gd / sgd)',     default='gd')
+    lr        = float(prompt('Learning Rate',            default=0.01))
+    th        = float(prompt('Threshold',          default=0.5))
     debug     = prompt('Debug logging (y/n)',      default='n').lower() == 'y'
-    th        = float(prompt('Threshold',                 default=0.5))
 
     optimizer = 'gd'
     print('\nTraining...')
-    model = LogisticRegression(threshold=th, epochs=epochs, optimizer=optimizer, debug=debug)
+    model = LogisticRegression(learning_rate = lr, threshold=th, epochs=epochs, optimizer=optimizer, debug=debug)
     model.fit(X_train, y_train)
     print(f'Training accuracy: {model.score(X_train, y_train):.2%}\n')
     

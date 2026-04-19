@@ -37,6 +37,10 @@ public:
 
         return probs;
     }
+
+    double forward_single(const std::vector<double>& x_sample, std::vector<double>& weights, double bias){
+        return predict_probability(x_sample, weights, bias);
+    }
 };
 
 #endif

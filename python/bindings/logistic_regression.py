@@ -75,18 +75,20 @@ class LogisticRegression:
 
     def __init__(
         self,
+        learning_rate: float = 0.1,
         threshold: float = 0.5,
         epochs: int = 1000,
         optimizer: str = "gd",
         debug: bool = False,
     ) -> None:
+        self.learning_rate = learning_rate
         self.threshold = threshold
         self.epochs = epochs
         self.debug = debug
         self._optimizer_name = optimizer
 
         # Underlying C++ objects
-        self._model: _Model = _Model(threshold, epochs, debug)
+        self._model: _Model = _Model(learning_rate, threshold, epochs, debug)
         self._opt: Optimizer = _make_optimizer(optimizer)
         self._classifier: _LogitClassifier = _LogitClassifier()
 

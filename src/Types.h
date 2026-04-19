@@ -40,6 +40,31 @@ struct Gradients {
 
         return {dW, dB};
     }
+
+
+    static Gradients calculate_gradients_sgd(
+            double pred, 
+            const std::vector<double>& x_sample, 
+            double y_sample) 
+    {
+        int num_features = x_sample.size();
+        std::vector<double> dW_vec(num_features, 0.0);
+
+        // 1. Calculate error for the single sample
+        double error = pred - y_sample;
+
+        // 2. Gradient for weights: dL/dw = (y_hat - y) * x
+        for (int j = 0; j < num_features; ++j) {
+            dW_vec[j] = error * x_sample[j];
+        }
+
+        // 3. Gradient for bias: dL/db = (y_hat - y)
+        double dB_val = error;
+
+        // No division by N because N = 1
+        return {dW_vec, dB_val};
+    }
+    
 };
 
 #endif
