@@ -30,7 +30,7 @@ public:
     LogitClassifier(){};
 
     // forward pass: (X * W) + B then Sigmoid
-    std::vector<double> forward_batch(const std::vector<std::vector<double>>& X, std::vector<double>& weights, double bias){
+    std::vector<double> forward_batch(const std::vector<std::vector<double>>& X, std::vector<double>& weights, double bias, bool flag){
         std::vector<double> probs(X.size());
 
         #pragma omp paralel for schedule(static) if flag

@@ -43,8 +43,8 @@ PYBIND11_MODULE(logistic_regression_cpu, m){
   py::class_<LogitClassifier>(m, "LogitClassifier")
     .def(py::init<>())
     // weights is a non-const ref in C++; copy it so Python lists bind correctly
-    .def("forward_batch", [](LogitClassifier& self, const std::vector<std::vector<double>>& X, std::vector<double> weights, double bias){
-      return self.forward_batch(X, weights, bias);
+    .def("forward_batch", [](LogitClassifier& self, const std::vector<std::vector<double>>& X, std::vector<double> weights, double bias, bool flag){
+      return self.forward_batch(X, weights, bias, flag);
     });
 
   py::class_<Gradients>(m, "Gradients")
