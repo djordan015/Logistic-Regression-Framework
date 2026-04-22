@@ -10,7 +10,8 @@ struct Gradients {
     static Gradients calculate_gradients(
             const std::vector<double>& pred, 
             const std::vector<std::vector<double>>& X, 
-            const std::vector<double>& Y) 
+            const std::vector<double>& Y,
+            const bool& flag) 
     {
         int N = X.size(); 
         int num_features = X[0].size();
@@ -18,6 +19,7 @@ struct Gradients {
         std::vector<double> dW(num_features, 0.0);
         double dB = 0.0;
 
+        #pragma omp parallel for reduction(+:dB) reduction(+:dW[:num_features]) schedule(static) if(flag)
         // 1. Iterate over every sample
         for (int i = 0; i < N; ++i) {
             // Calculate error for this specific sample
@@ -40,6 +42,7 @@ struct Gradients {
 
         return {dW, dB};
     }
+
 
 
     static Gradients calculate_gradients_sgd(

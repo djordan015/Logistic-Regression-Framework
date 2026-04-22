@@ -198,8 +198,8 @@ public:
             }
             else{
                 // Batch Gradient Descent
-                std::vector<double> probs = classifier.forward_batch(X_train, weights, bias);
-                Gradients grads = Gradients::calculate_gradients(probs, X_train, Y_train);
+                std::vector<double> probs = classifier.forward_batch(X_train, weights, bias, true);
+                Gradients grads = Gradients::calculate_gradients(probs, X_train, Y_train, true);
 
                 // double lr = 0.1;
                 opt.apply_step_omp(weights, bias, grads, learning_rate);
@@ -249,8 +249,8 @@ public:
             }
             else{
                 // Batch Gradient Descent
-                std::vector<double> probs = classifier.forward_batch(X_train, weights, bias);
-                Gradients grads = Gradients::calculate_gradients(probs, X_train, Y_train);
+                std::vector<double> probs = classifier.forward_batch(X_train, weights, bias, false);
+                Gradients grads = Gradients::calculate_gradients(probs, X_train, Y_train, false);
 
                 // double lr = 0.1;
                 opt.apply_step(weights, bias, grads, learning_rate);
