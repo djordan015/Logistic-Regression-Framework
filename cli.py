@@ -2,6 +2,7 @@ import csv
 import numpy as np
 import pandas as pd
 from python.bindings import LogisticRegression
+import time
 
 
 # ── CSV helper ────────────────────────────────────────────────────────────────
@@ -105,11 +106,19 @@ def train():
     lr        = float(prompt('Learning Rate',            default=0.01))
     th        = float(prompt('Threshold',          default=0.5))
     debug     = prompt('Debug logging (y/n)',      default='n').lower() == 'y'
+    use_omp   = prompt('Use opm (y/n)',            default='n').lower() =='y'
 
     optimizer = 'gd'
     print('\nTraining...')
     model = LogisticRegression(learning_rate = lr, threshold=th, epochs=epochs, optimizer=optimizer, debug=debug)
-    model.fit(X_train, y_train, True)
+    if use_omp:
+        print("Training model with OMP enabled")
+    
+    start_time = time.perf_counter()
+    model.fit(X_train, y_train, use_omp=use_omp)
+    end_time = time.perf_counter()
+    
+    print(f"Training completed in {end_time - start_time:.6f} seconds")
     print(f'Training accuracy: {model.score(X_train, y_train):.2%}\n')
     
     return model
