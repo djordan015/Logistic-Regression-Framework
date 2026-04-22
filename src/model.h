@@ -83,7 +83,7 @@ private:
         const std::vector<double>& Y_train,
         const int epoch){
 
-        std::vector<double> current_probs = classifier.forward_batch(X_train, weights, bias);
+        std::vector<double> current_probs = classifier.forward_batch(X_train, weights, bias, false);
         double entropy = binary_cross_entropy(current_probs, Y_train);
         double accuracy = get_accuracy(current_probs, Y_train);
 
@@ -264,7 +264,7 @@ public:
     }   
 
     const double test(const std::vector<std::vector<double>>& X_unseen, const std::vector<double>& Y_unseen) {
-        std::vector<double> probs = classifier.forward_batch(X_unseen, weights, bias);
+        std::vector<double> probs = classifier.forward_batch(X_unseen, weights, bias, false);
         double acc = get_accuracy(probs, Y_unseen);
         return acc;
     }
