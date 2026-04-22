@@ -4,6 +4,7 @@
 #include <vector>
 #include <cmath>
 #include <stdexcept>
+#include <omp.h>
 
 class LogitClassifier {
 private:
@@ -31,6 +32,8 @@ public:
     // forward pass: (X * W) + B then Sigmoid
     std::vector<double> forward_batch(const std::vector<std::vector<double>>& X, std::vector<double>& weights, double bias){
         std::vector<double> probs(X.size());
+
+        #pragma omp paralel for schedule(static) if flag
         for(int i = 0; i < X.size(); ++i) {
             probs[i] = predict_probability(X[i], weights, bias);
         }
@@ -43,4 +46,4 @@ public:
     }
 };
 
-#endif
+#endif 

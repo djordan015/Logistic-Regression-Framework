@@ -10,7 +10,11 @@ namespace py = pybind11;
 PYBIND11_MODULE(logistic_regression_cpu, m){
   py::class_<Model>(m, "Model")
     .def(py::init<double, double, int, bool>())
-    .def("train", &Model::train)
+    .def("train", &Model::train, 
+        py::arg("X_train"), 
+        py::arg("Y_train"), 
+        py::arg("opt"), 
+        py::arg("use_omp"))
     // Y_unseen is a non-const ref in C++; copy it so Python lists bind correctly
     .def("test", [](Model& self, const std::vector<std::vector<double>>& X, std::vector<double> Y){
       return self.test(X, Y);

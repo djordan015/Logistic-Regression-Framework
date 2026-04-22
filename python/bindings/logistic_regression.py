@@ -100,8 +100,9 @@ class LogisticRegression:
         self,
         X: Union[np.ndarray, list],
         y: Union[np.ndarray, list],
+        use_omp: bool
     ) -> "LogisticRegression":
-        self._model.train(_to_2d_list(X), _to_1d_list(y), self._opt)
+        self._model.train(_to_2d_list(X), _to_1d_list(y), self._opt, use_omp)
         self._is_fitted = True
         return self
 

@@ -5,7 +5,6 @@
 #include <cassert>
 #include <iomanip>
 #include "model.h"
-#include "Optimizer.h"
 
 /**
  * Generates a synthetic dataset for binary classification.
@@ -41,7 +40,8 @@ void test_optimizer(const std::string& name,
                     const std::vector<double>& Y_test,
                     int epochs, 
                     double lr,
-                    double th) {
+                    double th,
+                    bool omp) {
 
     std::cout << "\n>>> Testing Optimizer: " << name << " <<<" << std::endl;
 
@@ -51,7 +51,7 @@ void test_optimizer(const std::string& name,
 
     auto start = std::chrono::high_resolution_clock::now();
     
-    model.train(X_train, Y_train, opt);
+    model.train(X_train, Y_train, opt, true);
     
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = end - start;
@@ -73,8 +73,13 @@ int main() {
     const int EPOCHS = 500;
     const double LEARNING_RATE = 0.1;
     const double THRESHOLD = 0.65;
+    const bool omp = true;
+
 
     try {
+        if (omp) {
+            std::cout << "USE OMP" << std::endl;
+        }
         std::cout << "--- Starting Comparative Test Suite ---" << std::endl;
         
         // 1. Prepare Data
@@ -85,13 +90,13 @@ int main() {
 
         // 2. Test Batch Gradient Descent
         GradientDescent gd_opt;
-        test_optimizer("Batch Gradient Descent", gd_opt, X_train, Y_train, X_test, Y_test, EPOCHS, LEARNING_RATE, THRESHOLD);
+        test_optimizer("Batch Gradient Descent", gd_opt, X_train, Y_train, X_test, Y_test, EPOCHS, LEARNING_RATE, THRESHOLD, omp);
 
         std::cout << "\n--------------------------------------------" << std::endl;
 
         // 3. Test Stochastic Gradient Descent
         SGD sgd_opt;
-        test_optimizer("Stochastic Gradient Descent", sgd_opt, X_train, Y_train, X_test, Y_test, EPOCHS, LEARNING_RATE, THRESHOLD);
+        test_optimizer("Stochastic Gradient Descent", sgd_opt, X_train, Y_train, X_test, Y_test, EPOCHS, LEARNING_RATE, THRESHOLD, omp);
 
     } catch (const std::exception& e) {
         std::cerr << "Test suite failed: " << e.what() << std::endl;

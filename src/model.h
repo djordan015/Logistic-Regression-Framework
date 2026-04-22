@@ -78,6 +78,21 @@ private:
         // Formula: lr = base_lr / (1 + decay * epoch)
         return base_lr / (1.0 + decay * epoch);
     }
+
+    void print_results(const std::vector<std::vector<double>>& X_train, 
+        const std::vector<double>& Y_train,
+        const int epoch){
+
+        std::vector<double> current_probs = classifier.forward_batch(X_train, weights, bias);
+        double entropy = binary_cross_entropy(current_probs, Y_train);
+        double accuracy = get_accuracy(current_probs, Y_train);
+
+        std::cout << "Epoch: [" << std::setw(5) << epoch << "/" << epochs << "] "
+                << "| Loss: " << std::fixed << std::setprecision(6) << entropy 
+                << "| Acc: " << std::setprecision(2) << (accuracy * 100.0) << "%" 
+                << std::endl;
+            
+    }
         
 
 public:
@@ -87,7 +102,7 @@ public:
     };
 
     Model(double lr, double th, int ep, bool debug = false) 
-    : learning_rate(lr), threshold(th), epochs(ep), print_log(debug) {
+    : learning_rate(lr), threshold(th), epochs(ep), print_log(debug){
         classifier = LogitClassifier();
     }
 
@@ -131,9 +146,75 @@ public:
     void set_learing_rate(double lr){
         learning_rate = lr;
     }
-
     void train(const std::vector<std::vector<double>>& X_train, 
-            const std::vector<double> Y_train, 
+            const std::vector<double>& Y_train, 
+            Optimizer& opt,
+            bool use_omp) {
+
+        if (use_omp){
+            // std::cout << "TRAINING WITH OMP" << std::endl;
+            train_omp(X_train, Y_train, opt);
+        }
+        else{
+            train_og(X_train, Y_train, opt);
+        }
+    }
+
+
+
+    void train_omp(const std::vector<std::vector<double>>& X_train, 
+            const std::vector<double>& Y_train, 
+            Optimizer& opt) {
+
+        validate_data(X_train, Y_train);
+        initialize_parameters(X_train[0].size());
+        
+        const int interval = static_cast<int>(epochs * 0.1);
+        const int N = X_train.size();
+        bool is_sgd = false;
+        if (SGD* sgd_ptr = dynamic_cast<SGD*>(&opt)) {
+            is_sgd = true;
+        }
+        
+
+        std::vector<int> indices(N);
+        std::iota(indices.begin(), indices.end(), 0);
+        std::random_device rd;
+        std::mt19937 g(rd());
+
+        for (int epoch = 0; epoch <= epochs; ++epoch) {
+            
+            if(is_sgd){
+                std::shuffle(indices.begin(), indices.end(), g);
+                for (int step = 0; step < N; ++step) {
+                    int i = indices[step];
+
+                    double prob = classifier.forward_single(X_train[i], weights, bias);
+                    Gradients grads = Gradients::calculate_gradients_sgd(prob, X_train[i], Y_train[i]);
+
+                    // double lr = 0.1;
+                    opt.apply_step_omp(weights, bias, grads, learning_rate);
+                    }
+            }
+            else{
+                // Batch Gradient Descent
+                std::vector<double> probs = classifier.forward_batch(X_train, weights, bias);
+                Gradients grads = Gradients::calculate_gradients(probs, X_train, Y_train);
+
+                // double lr = 0.1;
+                opt.apply_step_omp(weights, bias, grads, learning_rate);
+            }
+            
+            // Check Accuracy
+            if ((print_log && epoch % interval == 0 ) || (print_log && epoch == epochs)) {
+                print_results(X_train, Y_train, epoch);
+            }
+        }
+    }
+    
+    
+    void train_og(const std::vector<std::vector<double>>& X_train, 
+            const std::vector<double>& Y_train, 
             Optimizer& opt) {
                 
         validate_data(X_train, Y_train);
@@ -177,16 +258,8 @@ public:
             
             // Check Accuracy
             if ((print_log && epoch % interval == 0 ) || (print_log && epoch == epochs)) {
-                std::vector<double> current_probs = classifier.forward_batch(X_train, weights, bias);
-                double entropy = binary_cross_entropy(current_probs, Y_train);
-                double accuracy = get_accuracy(current_probs, Y_train);
-
-                std::cout << "Epoch: [" << std::setw(5) << epoch << "/" << epochs << "] "
-                        << "| Loss: " << std::fixed << std::setprecision(6) << entropy 
-                        << "| Acc: " << std::setprecision(2) << (accuracy * 100.0) << "%" 
-                        << std::endl;
+                print_results(X_train, Y_train, epoch);
             }
-            
         }
     }   
 

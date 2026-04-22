@@ -109,7 +109,7 @@ def train():
     optimizer = 'gd'
     print('\nTraining...')
     model = LogisticRegression(learning_rate = lr, threshold=th, epochs=epochs, optimizer=optimizer, debug=debug)
-    model.fit(X_train, y_train)
+    model.fit(X_train, y_train, True)
     print(f'Training accuracy: {model.score(X_train, y_train):.2%}\n')
     
     return model
