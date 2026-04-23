@@ -12,13 +12,14 @@ This framework also enables weight saving and loading.
 
 ## Project Structure
 ```
+├── data/                     # .csv and saved .json data directroy
 ├── src/
-│   ├── LogitClassifier.h     # Logistic Regression logic
-│   ├── Model.h               # Abstract base classes for extensibility
+│   ├── LogitClassifier.h     # Logit calculation class
+│   ├── Model.h               # Logistic Regression class
 │   ├── Optimizer.h           # Gradient Descent & optimization routines
 │   ├── Types.h               # Custom type aliases 
 │   ├── bindings.cc           # Pybind11 glue code
-│   └── compile.sh            # One-touch build automation
+│   └── compile.sh            # Compile for testing
 ├── python/                   # Python wrapper 
 ├── cli.py                    # Main entry point for model interaction
 ├── CMakeLists.txt            # Cross-platform build configuration
