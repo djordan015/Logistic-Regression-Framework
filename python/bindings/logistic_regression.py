@@ -96,13 +96,10 @@ class LogisticRegression:
 
     # Fitting 
 
-    def fit(
-        self,
-        X: Union[np.ndarray, list],
-        y: Union[np.ndarray, list],
-        use_omp: bool
-    ) -> "LogisticRegression":
-        self._model.train(_to_2d_list(X), _to_1d_list(y), self._opt, use_omp)
+    def fit(self, X, y, use_omp: bool = True):
+        X = np.ascontiguousarray(X, dtype=np.float64)
+        y = np.ascontiguousarray(y, dtype=np.float64)
+        self._model.train(X, y, self._opt, use_omp)
         self._is_fitted = True
         return self
 
@@ -116,7 +113,7 @@ class LogisticRegression:
         X_list   = _to_2d_list(X)
         weights  = self._model.get_weights()   # list[float] copy
         bias     = self._model.get_bias()
-        probs    = self._classifier.forward_batch(X_list, weights, bias)
+        probs    = self._classifier.forward_batch(X_list, weights, bias, False)
         return np.array(probs, dtype=float)
 
     def predict(

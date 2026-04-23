@@ -3,6 +3,22 @@
 
 #include <vector>
 
+struct MatrixView {
+    const double* data;
+    int N;
+    int M;
+
+    // get a pointer to the start of row i
+    inline const double* row(int i) const {
+        return data + i * M;
+    }
+
+    // get the single number at row i, column j
+    inline double at(int i, int j) const {
+        return data[i * M + j];
+    }
+};
+
 struct Gradients {
     std::vector<double> dW;
     double dB;
@@ -43,6 +59,34 @@ struct Gradients {
         return {dW, dB};
     }
 
+    //Overloaded function for OMP version that takes MatrixView instead of vector of vectors
+    static Gradients calculate_gradients(const std::vector<double>& pred, const MatrixView& X, const std::vector<double>& Y, const bool& flag)
+    {
+        const int N = X.N;
+        const int num_features = X.M;
+
+        std::vector<double> dW(num_features, 0.0);
+        double dB = 0.0;
+
+        #pragma omp parallel for reduction(+:dB) reduction(+:dW[:num_features]) schedule(static) if(flag)
+        for (int i = 0; i < N; ++i) {
+            const double error = pred[i] - Y[i];
+            const double* row = X.row(i);
+
+            for (int j = 0; j < num_features; ++j) {
+                dW[j] += error * row[j];
+            }
+            dB += error;
+        }
+
+        for (int j = 0; j < num_features; ++j) {
+            dW[j] /= N;
+        }
+        dB /= N;
+
+        return {dW, dB};
+    }
+
 
 
     static Gradients calculate_gradients_sgd(
@@ -66,6 +110,17 @@ struct Gradients {
 
         // No division by N because N = 1
         return {dW_vec, dB_val};
+    }
+
+    static Gradients calculate_gradients_sgd(double pred,
+                                         const double* x_sample, int M,
+                                         double y_sample) {
+        std::vector<double> dW_vec(M, 0.0);
+        const double error = pred - y_sample;
+        for (int j = 0; j < M; ++j) {
+            dW_vec[j] = error * x_sample[j];
+        }
+        return {dW_vec, error};
     }
     
 };

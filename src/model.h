@@ -93,6 +93,19 @@ private:
                 << std::endl;
             
     }
+
+    void print_results(const MatrixView& X_view,
+                   const std::vector<double>& Y_train,
+                   const int epoch) {
+        std::vector<double> current_probs = classifier.forward_batch(X_view, weights, bias, false);
+        double entropy  = binary_cross_entropy(current_probs, Y_train);
+        double accuracy = get_accuracy(current_probs, Y_train);
+
+        std::cout << "Epoch: [" << std::setw(5) << epoch << "/" << epochs << "] "
+                  << "| Loss: " << std::fixed << std::setprecision(6) << entropy
+                  << "| Acc: " << std::setprecision(2) << (accuracy * 100.0) << "%"
+                  << std::endl;
+    }
         
 
 public:
@@ -146,31 +159,38 @@ public:
     void set_learing_rate(double lr){
         learning_rate = lr;
     }
-    void train(const std::vector<std::vector<double>>& X_train, 
-            const std::vector<double>& Y_train, 
-            Optimizer& opt,
-            bool use_omp) {
-
-        if (use_omp){
-            // std::cout << "TRAINING WITH OMP" << std::endl;
-            train_omp(X_train, Y_train, opt);
-        }
-        else{
-            train_og(X_train, Y_train, opt);
+    void train(const MatrixView& X_view,
+           const std::vector<double>& Y_train,
+           Optimizer& opt,
+           bool use_omp) {
+        if (use_omp) {
+            train_omp(X_view, Y_train, opt);
+        } else {
+            // Reconstruct nested from the view so train_og can run unchanged.
+            // Small one-time cost; negligible next to training itself.
+            const int N = X_view.N;
+            const int M = X_view.M;
+            std::vector<std::vector<double>> X_nested(N, std::vector<double>(M));
+            for (int i = 0; i < N; ++i) {
+                const double* row = X_view.row(i);
+                std::copy(row, row + M, X_nested[i].begin());
+            }
+            train_og(X_nested, Y_train, opt);
         }
     }
 
 
 
-    void train_omp(const std::vector<std::vector<double>>& X_train, 
-            const std::vector<double>& Y_train, 
-            Optimizer& opt) {
+    void train_omp(const MatrixView& X_view,
+               const std::vector<double>& Y_train,
+               Optimizer& opt) {
 
-        validate_data(X_train, Y_train);
-        initialize_parameters(X_train[0].size());
+        // Build flat buffer once, reuse for every epoch.
+        const int N = X_view.N;
+        const int M = X_view.M;
+        initialize_parameters(M);
         
         const int interval = static_cast<int>(epochs * 0.1);
-        const int N = X_train.size();
         bool is_sgd = false;
         if (SGD* sgd_ptr = dynamic_cast<SGD*>(&opt)) {
             is_sgd = true;
@@ -184,30 +204,30 @@ public:
 
         for (int epoch = 0; epoch <= epochs; ++epoch) {
             
-            if(is_sgd){
+            if (is_sgd) {
                 std::shuffle(indices.begin(), indices.end(), g);
                 for (int step = 0; step < N; ++step) {
                     int i = indices[step];
-
-                    double prob = classifier.forward_single(X_train[i], weights, bias);
-                    Gradients grads = Gradients::calculate_gradients_sgd(prob, X_train[i], Y_train[i]);
-
-                    // double lr = 0.1;
+                    const double* row = X_view.row(i);
+                
+                    double prob = classifier.forward_single(row, M, weights, bias);
+                    Gradients grads = Gradients::calculate_gradients_sgd(prob, row, M, Y_train[i]);
+                
                     opt.apply_step_omp(weights, bias, grads, learning_rate);
-                    }
+                }
             }
             else{
                 // Batch Gradient Descent
-                std::vector<double> probs = classifier.forward_batch(X_train, weights, bias, true);
-                Gradients grads = Gradients::calculate_gradients(probs, X_train, Y_train, true);
+                std::vector<double> probs = classifier.forward_batch(X_view, weights, bias, true);
+                Gradients grads = Gradients::calculate_gradients(probs, X_view, Y_train, true);
 
                 // double lr = 0.1;
                 opt.apply_step_omp(weights, bias, grads, learning_rate);
             }
             
             // Check Accuracy
-            if ((print_log && epoch % interval == 0 ) || (print_log && epoch == epochs)) {
-                print_results(X_train, Y_train, epoch);
+            if ((print_log && epoch % interval == 0) || (print_log && epoch == epochs)) {
+                print_results(X_view, Y_train, epoch);   // <-- uses the new MatrixView overload
             }
         }
     }

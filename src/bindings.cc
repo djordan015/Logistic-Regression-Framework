@@ -1,5 +1,6 @@
 #include<pybind11/pybind11.h>
 #include<pybind11/stl.h>
+#include <pybind11/numpy.h>
 #include"model.h"
 #include"LogitClassifier.h"
 #include"Optimizer.h"
@@ -10,11 +11,33 @@ namespace py = pybind11;
 PYBIND11_MODULE(logistic_regression_cpu, m){
   py::class_<Model>(m, "Model")
     .def(py::init<double, double, int, bool>())
-    .def("train", &Model::train, 
-        py::arg("X_train"), 
-        py::arg("Y_train"), 
-        py::arg("opt"), 
-        py::arg("use_omp"))
+    .def("train", [](Model& self,
+                 py::array_t<double, py::array::c_style | py::array::forcecast> X,
+                 py::array_t<double, py::array::c_style | py::array::forcecast> Y,
+                 Optimizer& opt,
+                 bool use_omp) {
+        auto X_buf = X.request();
+        auto Y_buf = Y.request();
+                    
+        if (X_buf.ndim != 2) throw std::runtime_error("X must be 2-D");
+        if (Y_buf.ndim != 1) throw std::runtime_error("Y must be 1-D");
+                    
+        const int N = static_cast<int>(X_buf.shape[0]);
+        const int M = static_cast<int>(X_buf.shape[1]);
+        if (static_cast<int>(Y_buf.shape[0]) != N) {
+            throw std::runtime_error("X and Y must have the same number of samples");
+        }
+      
+        // MatrixView points directly into numpy's memory — no copy
+        MatrixView X_view{ static_cast<const double*>(X_buf.ptr), N, M };
+      
+        // For Y, copy once into a std::vector (it's 1-D and small).
+        // You could alternatively teach Model::train to accept a pointer + length for Y too.
+        const double* Y_ptr = static_cast<const double*>(Y_buf.ptr);
+        std::vector<double> Y_vec(Y_ptr, Y_ptr + N);
+      
+        self.train(X_view, Y_vec, opt, use_omp);
+    })
     // Y_unseen is a non-const ref in C++; copy it so Python lists bind correctly
     .def("test", [](Model& self, const std::vector<std::vector<double>>& X, std::vector<double> Y){
       return self.test(X, Y);

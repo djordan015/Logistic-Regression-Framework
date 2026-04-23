@@ -106,9 +106,8 @@ def train():
     lr        = float(prompt('Learning Rate',            default=0.01))
     th        = float(prompt('Threshold',          default=0.5))
     debug     = prompt('Debug logging (y/n)',      default='n').lower() == 'y'
-    use_omp   = prompt('Use opm (y/n)',            default='n').lower() =='y'
+    use_omp   = prompt('Use omp (y/n)',            default='y').lower() =='y'
 
-    optimizer = 'gd'
     print('\nTraining...')
     model = LogisticRegression(learning_rate = lr, threshold=th, epochs=epochs, optimizer=optimizer, debug=debug)
     if use_omp:

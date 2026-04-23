@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/rohitpatil/ML Systems Implementations/final_project/Logistic-Regression-Framework/build/cmake_install.cmake",
+		"/Users/rohitpatil/ML Systems Implementations/final_project/Logistic-Regression-Framework/build/pybind11/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
