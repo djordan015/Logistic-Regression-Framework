@@ -70,9 +70,14 @@ PYBIND11_MODULE(logistic_regression_cpu, m){
       return self.forward_batch(X, weights, bias, flag);
     });
 
-  py::class_<Gradients>(m, "Gradients")
-    .def(py::init<>())
-    .def_readwrite("dW", &Gradients::dW)
-    .def_readwrite("dB", &Gradients::dB)
-    .def_static("calculate_gradients", &Gradients::calculate_gradients);
+    py::class_<Gradients>(m, "Gradients")
+        .def(py::init<>())
+        .def_readwrite("dW", &Gradients::dW)
+        .def_readwrite("dB", &Gradients::dB)
+        .def_static("calculate_gradients", [](const std::vector<double>& Y, 
+                                            const MatrixView& X, 
+                                            const std::vector<double>& weights, 
+                                            bool flag) {
+            return Gradients::calculate_gradients(Y, X, weights, flag);
+        });
 }
