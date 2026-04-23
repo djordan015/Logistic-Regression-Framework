@@ -65,4 +65,5 @@ python3 cli.py
 
 
 ## References
+[300k Student prediction dataset](https://www.kaggle.com/datasets/rhythmghai/300k-student-performance-prediction-dataset) <br>
 https://www.geeksforgeeks.org/machine-learning/understanding-logistic-regression
